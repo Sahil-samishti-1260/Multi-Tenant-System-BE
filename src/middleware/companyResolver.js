@@ -4,15 +4,15 @@ const { getTenantPool } = tenantDb;
 
 const resolveCompany = async (req, res, next) => {
 
-  const slug = req.query.company || req.headers['x-company-slug'];
+  const slug = (req.query.company || req.headers['x-company-slug'])?.trim();
   console.log(`[CompanyResolver] Resolving company for slug: "${slug}"`);
 
-  if (!slug) {
-    return res.status(400).json({ error: 'Company slug is required (query param ?company=slug or header x-company-slug)' });
+  if (!slug || slug === 'null' || slug === 'undefined') {
+    return res.status(400).json({ error: 'Valid company slug is required' });
   }
 
   try {
-    // Fetch tenant configuration from master_db
+    // Fetch tenant configuration from common Database
     const result = await commonDb.query(
       'SELECT tenant_id, tenant_name, slug, connection_uri FROM tenants WHERE slug = $1',
       [slug]
@@ -26,6 +26,7 @@ const resolveCompany = async (req, res, next) => {
     console.log(`[CompanyResolver] Found Tenant: ID=${tenantInfo.tenant_id}, Name="${tenantInfo.tenant_name}"`);
     console.log(`[CompanyResolver] Connection String: ${tenantInfo.connection_uri}`);
 
+    console.log(`[DatabaseSwitch] >>> Switching request context to Tenant DB: ${tenantInfo.slug} <<<`);
     req.tenantDb = getTenantPool(tenantInfo.connection_uri);
     req.tenantInfo = tenantInfo;
 

@@ -7,23 +7,13 @@ const commonPool = new Pool({
 });
 
 commonPool.on('connect', () => {
-  console.log('[CommonDB] Master Database connected successfully');
+  console.log('Master Database connected successfully');
 });
 
 commonPool.on('error', (err) => {
-  console.error('[CommonDB] Unexpected error on idle client', err);
+  console.error('Unexpected error on idle client', err);
   process.exit(-1);
 });
-
-// Test the connection immediately
-commonPool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('[CommonDB] Master Database connection failed:', err.message);
-  } else {
-    console.log('[CommonDB] Master Database connection test successful');
-  }
-});
-
 
 export const query = (text, params) => commonPool.query(text, params);
 export const pool = commonPool;

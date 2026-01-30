@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
 import companyRoutes from './routes/company.routes.js';
+import tenantRoutes from './routes/tenant.routes.js';
 import resolveCompany from './middleware/companyResolver.js';
 
 const app = express();
@@ -15,6 +16,9 @@ app.use('/api/auth', authRoutes);
 
 // Protected routes for companies (Common DB)
 app.use('/api/companies', companyRoutes);
+
+// Tenant-specific routes
+app.use('/api/tenant-data', tenantRoutes);
 
 // Tenant-specific routes example
 app.use('/api/tenant', resolveCompany, (req, res) => {
