@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
+import commonRoutes from './routes/common.routes.js';
 import companyRoutes from './routes/company.routes.js';
-import tenantRoutes from './routes/tenant.routes.js';
 import resolveCompany from './middleware/companyResolver.js';
 
 const app = express();
@@ -11,18 +11,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Public routes
+// Authentication routes (public)
 app.use('/api/auth', authRoutes);
 
-// Protected routes for companies (Common DB)
-app.use('/api/companies', companyRoutes);
+// Common routes (access common DB to list/get tenant info)
+app.use('/api/companies', commonRoutes);
 
-// Tenant-specific routes
-app.use('/api/tenant-data', tenantRoutes);
+// Company-specific data routes (require company resolution and access tenant DB)
+app.use('/api/company-data', companyRoutes);
 
 // Tenant-specific routes example
 app.use('/api/tenant', resolveCompany, (req, res) => {
-  res.json({ message: `Accessing data for tenant ${req.tenantInfo.tenant_name}` });
+  res.json({ message: `Accessing data for company ${req.companyInfo.tenant_name}` });
 });
 
 

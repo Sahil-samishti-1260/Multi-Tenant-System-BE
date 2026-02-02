@@ -1,6 +1,6 @@
 import * as commonDb from '../config/commonDb.js';
-import tenantDb from '../config/tenantDb.js';
-const { getTenantPool } = tenantDb;
+import companyDb from '../config/companyDb.js';
+const { getCompanyPool } = companyDb;
 
 const resolveCompany = async (req, res, next) => {
 
@@ -12,27 +12,28 @@ const resolveCompany = async (req, res, next) => {
   }
 
   try {
-    // Fetch tenant configuration from common Database
+    // Fetch company configuration from common Database
     const result = await commonDb.query(
       'SELECT tenant_id, tenant_name, slug, connection_uri FROM tenants WHERE slug = $1',
       [slug]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Tenant not found' });
+      return res.status(404).json({ error: 'Company not found' });
     }
 
-    const tenantInfo = result.rows[0];
-    console.log(`[CompanyResolver] Found Tenant: ID=${tenantInfo.tenant_id}, Name="${tenantInfo.tenant_name}"`);
-    console.log(`[CompanyResolver] Connection String: ${tenantInfo.connection_uri}`);
+    const companyInfo = result.rows[0];
+    console.log('[CompanyResolver] Company Info:', companyInfo);
+    console.log(`[CompanyResolver] Found Company: ID=${companyInfo.tenant_id}, Name="${companyInfo.tenant_name}"`);
+    console.log(`[CompanyResolver] Connection String: ${companyInfo.connection_uri}`);
 
-    console.log(`[DatabaseSwitch] >>> Switching request context to Tenant DB: ${tenantInfo.slug} <<<`);
-    req.tenantDb = getTenantPool(tenantInfo.connection_uri);
-    req.tenantInfo = tenantInfo;
+    console.log(`[DatabaseSwitch] >>> Switching request context to Company DB: ${companyInfo.slug} <<<`);
+    req.companyDb = getCompanyPool(companyInfo.connection_uri);
+    req.companyInfo = companyInfo;
 
     next();
   } catch (error) {
-    console.error('Error resolving tenant:', error);
+    console.error('Error resolving company:', error);
     res.status(500).json({ error: 'Internal server error resolving tenant' });
   }
 };

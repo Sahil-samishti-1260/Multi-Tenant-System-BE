@@ -4,14 +4,17 @@ import 'dotenv/config';
 
 const commonPool = new Pool({
   connectionString: process.env.MASTER_DB_URI,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 commonPool.on('connect', () => {
-  console.log('Master Database connected successfully');
+  console.log('Common Database connected successfully');
 });
 
 commonPool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
+  console.error('Unexpected error on idle client in Common DB', err);
   process.exit(-1);
 });
 

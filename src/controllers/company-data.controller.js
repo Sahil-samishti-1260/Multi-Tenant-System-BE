@@ -1,7 +1,6 @@
-
 export const getTopCustomers = async (req, res) => {
   try {
-    const result = await req.tenantDb.query(
+    const result = await req.companyDb.query(
       'SELECT * FROM customers LIMIT 5'
     );
     res.json(result.rows);
@@ -13,7 +12,7 @@ export const getTopCustomers = async (req, res) => {
 
 export const getTopProducts = async (req, res) => {
   try {
-    const result = await req.tenantDb.query(
+    const result = await req.companyDb.query(
       'SELECT * FROM products LIMIT 5'
     );
     res.json(result.rows);

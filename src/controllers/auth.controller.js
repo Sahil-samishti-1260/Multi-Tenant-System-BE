@@ -5,12 +5,12 @@ import jwt from 'jsonwebtoken';
 export const register = async (req, res) => {
 
   const { username, password, email, role } = req.body;
-  const { tenant_id } = req.tenantInfo;
+  const { tenant_id } = req.companyInfo;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await req.tenantDb.query(
-      'INSERT INTO users (username, password, email, role, tenant_id) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+    const result = await req.companyDb.query(
+      'INSERT INTO users (username, password, email, role, company_id) VALUES ($1, $2, $3, $4, $5) RETURNING id',
       [username, hashedPassword, email, role || 'user', tenant_id]
     );
     res.status(201).json({ message: 'User registered successfully', userId: result.rows[0].id });
@@ -23,11 +23,11 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  const { tenant_id } = req.tenantInfo;
+  const { tenant_id } = req.companyInfo;
 
   try {
     // Authenticate user from the company's own database (attached to req by companyResolver)
-    const result = await req.tenantDb.query(
+    const result = await req.companyDb.query(
       'SELECT id, username, email, password, role FROM users WHERE email = $1',
       [email]
     );
@@ -43,11 +43,11 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // JWT payload includes user_id, tenant_id, and role
+    // JWT payload includes user_id, company_id, and role
     const token = jwt.sign(
       { 
         user_id: user.id, 
-        tenant_id: tenant_id, 
+        company_id: tenant_id, 
         role: user.role 
       }, 
       process.env.JWT_SECRET || 'your_secret_key', 
@@ -61,7 +61,7 @@ export const login = async (req, res) => {
         username: user.username, 
         email: user.email, 
         role: user.role,
-        tenant_id: tenant_id
+        company_id: tenant_id
       } 
     });
   } catch (error) {
